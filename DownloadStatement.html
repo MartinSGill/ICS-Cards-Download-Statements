@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module DownloadStatement</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>DownloadStatement</strong></big></big> (version 1.0.0)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///F:/projects/icscardsstatements/downloadstatement.py">f:\projects\icscardsstatements\downloadstatement.py</a></font></td></tr></table>
+    <p><tt>A&nbsp;script&nbsp;that&nbsp;is&nbsp;able&nbsp;to&nbsp;parse&nbsp;the&nbsp;ICS&nbsp;Cards&nbsp;ABN&nbsp;Amro&nbsp;site<br>
+and&nbsp;download&nbsp;statements&nbsp;for&nbsp;a&nbsp;specific&nbsp;month&nbsp;and&nbsp;save&nbsp;them<br>
+as&nbsp;CSV.<br>
+&nbsp;<br>
+It&nbsp;does&nbsp;some&nbsp;simple&nbsp;parsing&nbsp;of&nbsp;the&nbsp;statement&nbsp;entries&nbsp;to<br>
+make&nbsp;the&nbsp;CSV&nbsp;data&nbsp;more&nbsp;useful&nbsp;for&nbsp;importing&nbsp;into&nbsp;a<br>
+financial&nbsp;planning&nbsp;application.<br>
+&nbsp;<br>
+For&nbsp;options/help:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&gt;&nbsp;python&nbsp;DownloadStatement.py&nbsp;--help<br>
+&nbsp;<br>
+CAVEATS:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Only&nbsp;tested&nbsp;with&nbsp;the&nbsp;ABN&nbsp;Amro&nbsp;"theme"&nbsp;for&nbsp;icscards.nl<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Only&nbsp;tested&nbsp;with&nbsp;an&nbsp;account&nbsp;with&nbsp;a&nbsp;single&nbsp;card</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="argparse.html">argparse</a><br>
+<a href="csv.html">csv</a><br>
+</td><td width="25%" valign=top><a href="datetime.html">datetime</a><br>
+<a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="requests.html">requests</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="DownloadStatement.html#Period">Period</a>
+</font></dt><dt><font face="helvetica, arial"><a href="DownloadStatement.html#StatementReader">StatementReader</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Period">class <strong>Period</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Represents&nbsp;a&nbsp;statement&nbsp;period.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Period-__init__"><strong>__init__</strong></a>(self, month=1, year=2012)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;statement&nbsp;period.<br>
+:param&nbsp;month:&nbsp;<a href="#Period">Period</a>&nbsp;month.<br>
+:param&nbsp;year:&nbsp;<a href="#Period">Period</a>&nbsp;year<br>
+:return:&nbsp;new&nbsp;<a href="#Period">Period</a></tt></dd></dl>
+
+<dl><dt><a name="Period-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Override&nbsp;standard&nbsp;method&nbsp;to&nbsp;provide&nbsp;format&nbsp;required&nbsp;by&nbsp;statement&nbsp;URL.<br>
+:return:&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="Period-increment_month"><strong>increment_month</strong></a>(self)</dt><dd><tt>Increments&nbsp;the&nbsp;month&nbsp;by&nbsp;one,&nbsp;incrementing&nbsp;the&nbsp;year&nbsp;if&nbsp;needed.<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>month</strong> = 1</dl>
+
+<dl><dt><strong>year</strong> = 2012</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="StatementReader">class <strong>StatementReader</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Logs&nbsp;into&nbsp;the&nbsp;ICS&nbsp;Website&nbsp;and&nbsp;retrieves&nbsp;statements,<br>
+processes&nbsp;them&nbsp;and&nbsp;saves&nbsp;them&nbsp;as&nbsp;CSV.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="StatementReader-__init__"><strong>__init__</strong></a>(self, username, password)</dt></dl>
+
+<dl><dt><a name="StatementReader-get_statement"><strong>get_statement</strong></a>(self, period)</dt><dd><tt>Download&nbsp;the&nbsp;statement&nbsp;for&nbsp;the&nbsp;specified&nbsp;time&nbsp;period.<br>
+:param&nbsp;period:&nbsp;Time&nbsp;period&nbsp;of&nbsp;statement&nbsp;to&nbsp;retrieve.<br>
+:return:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="StatementReader-to_csv"><strong>to_csv</strong></a>(self, filename)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-main"><strong>main</strong></a>()</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__copyright__</strong> = 'Copyright 2014, Martin Gill'<br>
+<strong>__license__</strong> = 'MIT'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Martin&nbsp;Gill</td></tr></table>
+</body></html>
