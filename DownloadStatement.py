@@ -186,12 +186,20 @@ class Period:
 def main():
     month = datetime.date.today().month
     year = datetime.date.today().year
+    end_month = month
+    end_year = year
 
     parser = argparse.ArgumentParser(description="Downloads statements from ICS-Cards website and outputs them as csv.")
     parser.add_argument("username", help="Login Username.")
     parser.add_argument("password", help="Login Password.")
+    parser.add_argument("-v", "--verbose", help="Verbose output.", )
     parser.add_argument("-m", "--month", help="The statement month required. Current month if omitted.", type=int)
     parser.add_argument("-y", "--year", help="The statement year required. Current year if omitted.", type=int)
+
+    end_group = parser.add_argument_group()
+    end_group.add_argument("--end-month", help="The last statement month required.", type=int)
+    end_group.add_argument("--end-year", help="The last statement year required.", type=int)
+
     parser.add_argument("-f", "--filename", help="Output filename. 'yyyy-mm.csv' if omitted.")
     args = parser.parse_args()
 
@@ -201,15 +209,30 @@ def main():
     if args.year is not None:
         year = args.year
 
+    if args.end_month is not None:
+        end_month = args.end_month
+
+    if args.end_year is not None:
+        end_year = args.end_year
+
     if args.filename is None:
-        filename = "{0:04d}-{1:02d}.csv".format(year, month)
+        if month == end_month and year == end_year:
+            filename = "{0:04d}-{1:02d}.csv".format(year, month)
+        else:
+            filename = "{0:04d}-{1:02d}_to_{2:04d}-{3:02d}.csv".format(year, month, end_year, end_month)
     else:
         filename = args.filename
 
     ##  noinspection PyBroadException
     try:
         my_statement = StatementReader(args.username, args.password)
-        my_statement.get_statement(Period(month, year))
+        period = Period(month, year)
+        my_statement.get_statement(period)
+
+        while not (period.month == end_month and period.year == end_year):
+            period.increment_month()
+            my_statement.get_statement(period)
+
         my_statement.to_csv(filename)
     except Exception as ex:
         print(str(ex), file=sys.stderr)
