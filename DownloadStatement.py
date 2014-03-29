@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 A script that is able to parse the ICS Cards ABN Amro site
 and download statements for a specific month and save them
@@ -7,13 +8,13 @@ It does some simple parsing of the statement entries to
 make the CSV data more useful for importing into a
 financial planning application.
 
-For options/help:
+For options/help:::
 
     > python DownloadStatement.py --help
 
-CAVEATS:
-    Only tested with the ABN Amro "theme" for icscards.nl
-    Only tested with an account with a single card
+.. Note::
+   * Only tested with the ABN Amro "theme" for icscards.nl
+   * Only tested with an account with a single card
 """
 
 __author__ = 'Martin Gill'
@@ -21,8 +22,14 @@ __copyright__ = 'Copyright 2014, Martin Gill'
 __license__ = "MIT"
 __version__ = "1.0.0"
 
+import csv
+import re
+import sys
+import datetime
+import argparse
+
 from bs4 import BeautifulSoup
-import requests, csv, re, sys, datetime, argparse
+import requests
 
 
 class StatementReader:
@@ -36,6 +43,7 @@ class StatementReader:
     __username = ""
     __password = ""
     __headers = []
+    # Datum,*,Omschrijving,Card-nummer,Debet / Credit,Valuta,Bedrag,payee,out,in
     __entries = []
 
     def __init__(self, username, password):
@@ -45,8 +53,8 @@ class StatementReader:
     def get_statement(self, period):
         """
         Download the statement for the specified time period.
-        :param period: Time period of statement to retrieve.
-        :return: None
+
+        :parameter period: Time period of statement to retrieve.
         """
         self.__login()
         url = self.__baseUrl + period.__str__()
@@ -58,6 +66,11 @@ class StatementReader:
         self.__parse_table(tables)
 
     def to_csv(self, filename):
+        """
+        Write the downloaded statement to CSV format.
+
+        :param filename: Name of the file to create.
+        """
         print('Writing CSV to: "{0}"'.format(filename))
         with open(filename, 'w', newline='') as csv_file:
             writer = csv.writer(csv_file,
@@ -66,6 +79,27 @@ class StatementReader:
                                 quoting=csv.QUOTE_MINIMAL)
             writer.writerow(self.__headers)
             writer.writerows(self.__entries)
+
+    def to_qif(self, filename):
+        """
+        Write the downloaded statement to QIF format.
+
+        :param filename: Name of the file to create.
+        """
+
+        print('Writing QIF to: "{0}"'.format(filename))
+        with open(filename, 'w') as qif_file:
+            qif_file.write("!Account\n")
+            qif_file.write("N ICS Credit Card\n")
+            qif_file.write("^\n")
+            qif_file.write("!Type:CCard\n")
+
+            for line in self.__entries:
+                qif_file.write("D{0}\n".format(line[0]))
+                qif_file.write("T{0}\n".format(line[6]))
+                qif_file.write("M{0}\n".format(line[5]))
+                qif_file.write("P{0}\n".format(line[7]))
+                qif_file.write("^\n")
 
     def __get_headers(self, table):
         print('Getting Headers')
@@ -151,48 +185,60 @@ class Period:
     """
     Represents a statement period.
     """
-    year = 2012
-    month = 1
 
     def increment_month(self):
         """
         Increments the month by one, incrementing the year if needed.
-        :return: None
         """
-        if self.month == 12:
-            self.month = 1
-            self.year += 1
+        if self.__month == 12:
+            self.__month = 1
+            self.__year += 1
         else:
-            self.month += 1
+            self.__month += 1
 
-    def __init__(self, month=1, year=2012):
+    def __init__(self, month, year):
         """
         Create a new statement period.
-        :param month: Period month.
-        :param year: Period year
-        :return: new Period
+
+        :param: month: Period month.
+        :param: year: Period year
         """
-        self.year = year
-        self.month = month
+        self.__year = year
+        self.__month = month
+
+    @property
+    def month(self):
+        """
+        The month this Period represents.
+        """
+        return self.__month
+
+    @property
+    def year(self):
+        """
+        The year this Period represents.
+        """
+        return self.__year
 
     def __str__(self):
         """
         Override standard method to provide format required by statement URL.
-        :return: str
         """
         return str.format("{0:04d}{1:02d}", self.year, self.month)
 
 
 def main():
+    """
+    Main method for the script.
+    """
     month = datetime.date.today().month
     year = datetime.date.today().year
-    end_month = month
-    end_year = year
+    end_month = None
+    end_year = None
 
     parser = argparse.ArgumentParser(description="Downloads statements from ICS-Cards website and outputs them as csv.")
     parser.add_argument("username", help="Login Username.")
     parser.add_argument("password", help="Login Password.")
-    parser.add_argument("-v", "--verbose", help="Verbose output.", )
     parser.add_argument("-m", "--month", help="The statement month required. Current month if omitted.", type=int)
     parser.add_argument("-y", "--year", help="The statement year required. Current year if omitted.", type=int)
 
@@ -200,7 +246,14 @@ def main():
     end_group.add_argument("--end-month", help="The last statement month required.", type=int)
     end_group.add_argument("--end-year", help="The last statement year required.", type=int)
 
-    parser.add_argument("-f", "--filename", help="Output filename. 'yyyy-mm.csv' if omitted.")
+    file_group = parser.add_argument_group()
+    file_group.add_argument("-f", "--filename", help="Output filename. 'yyyy-mm' if omitted.")
+    file_group.add_argument("-t",
+                            "--format",
+                            help="The output format of the file. Default is QIF",
+                            default="qif",
+                            type=str,
+                            choices=["csv", "qif"])
     args = parser.parse_args()
 
     if args.month is not None:
@@ -217,26 +270,35 @@ def main():
 
     if args.filename is None:
         if month == end_month and year == end_year:
-            filename = "{0:04d}-{1:02d}.csv".format(year, month)
+            filename = "{0:04d}-{1:02d}.{2}".format(year, month, args.format)
         else:
-            filename = "{0:04d}-{1:02d}_to_{2:04d}-{3:02d}.csv".format(year, month, end_year, end_month)
+            filename = "{0:04d}-{1:02d}_to_{2:04d}-{3:02d}.{4}".format(year, month, end_year, end_month, format)
     else:
-        filename = args.filename
+        if args.filename.endswith(".{0}".format(args.format)):
+            filename = args.filename
+        else:
+            filename = args.filename + ".{0}".format(args.format)
 
-    ##  noinspection PyBroadException
+    # #  noinspection PyBroadException
     try:
         my_statement = StatementReader(args.username, args.password)
         period = Period(month, year)
         my_statement.get_statement(period)
 
-        while not (period.month == end_month and period.year == end_year):
-            period.increment_month()
-            my_statement.get_statement(period)
+        if end_month is not None and end_year is not None:
+            while not (period.month == end_month and period.year == end_year):
+                period.increment_month()
+                my_statement.get_statement(period)
 
-        my_statement.to_csv(filename)
+        if args.format == "qif":
+            my_statement.to_qif(filename)
+        else:
+            my_statement.to_csv(filename)
+
     except Exception as ex:
-        print(str(ex), file=sys.stderr)
+        print("ERROR: {0}", str(ex), file=sys.stderr)
         exit(-1)
+
 
 if __name__ == "__main__":
     main()
